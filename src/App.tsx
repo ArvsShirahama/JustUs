@@ -5,6 +5,9 @@ import { getCurrentUser } from '@/services/supabase/auth'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
 import { AppShell } from '@/components/layout/AppShell'
 import { useRealtimeNotifications } from '@/features/notifications/hooks/useRealtimeNotifications'
+import { useIncomingCalls } from '@/features/calls/hooks/useIncomingCalls'
+import { IncomingCallDialog } from '@/features/calls/components/IncomingCallDialog'
+import { useCallStore } from '@/features/calls/stores/call.store'
 
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'))
 const SignupPage = lazy(() => import('@/features/auth/pages/SignupPage'))
@@ -31,10 +34,43 @@ const MessagesPage = lazy(
 const ConversationPage = lazy(
   () => import('@/features/messages/pages/ConversationPage')
 )
+const CallHistoryPage = lazy(
+  () => import('@/features/calls/pages/CallHistoryPage')
+)
 
 function AuthenticatedApp({ children }: { children: React.ReactNode }) {
   useRealtimeNotifications()
-  return <AppShell>{children}</AppShell>
+  useIncomingCalls()
+  const incomingCall = useCallStore((s) => s.incomingCall)
+  const setIncomingCall = useCallStore((s) => s.setIncomingCall)
+  const setActiveCall = useCallStore((s) => s.setActiveCall)
+  const setCallType = useCallStore((s) => s.setCallType)
+  const setCallStatus = useCallStore((s) => s.setCallStatus)
+
+  const handleAcceptCall = () => {
+    if (incomingCall) {
+      setActiveCall(incomingCall)
+      setCallType(incomingCall.type)
+      setCallStatus('connecting')
+      setIncomingCall(null)
+    }
+  }
+
+  const handleDeclineCall = () => {
+    setIncomingCall(null)
+  }
+
+  return (
+    <>
+      <AppShell>{children}</AppShell>
+      {incomingCall && (
+        <IncomingCallDialog
+          onAccept={handleAcceptCall}
+          onDecline={handleDeclineCall}
+        />
+      )}
+    </>
+  )
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -171,6 +207,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <ConversationPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/calls"
+          element={
+            <ProtectedRoute>
+              <CallHistoryPage />
             </ProtectedRoute>
           }
         />
