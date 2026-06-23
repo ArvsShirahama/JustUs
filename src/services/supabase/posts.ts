@@ -2,6 +2,14 @@ import { supabase } from './client'
 import { uploadFile } from './storage'
 import type { Post } from '@/types/database.types'
 
+function extractCount(val: unknown): number {
+  if (Array.isArray(val) && val.length > 0) {
+    const first = val[0] as Record<string, unknown>
+    return typeof first.count === 'number' ? first.count : 0
+  }
+  return 0
+}
+
 export interface PostWithDetails extends Post {
   profiles: {
     id: string
@@ -82,7 +90,12 @@ export async function getFeedPosts(
 
   if (error) throw error
 
-  const posts = data as unknown as PostWithDetails[]
+  const rawPosts = data as unknown as PostWithDetails[]
+  const posts = rawPosts.map((p) => ({
+    ...p,
+    likes_count: extractCount((p as unknown as Record<string, unknown>).likes_count),
+    comments_count: extractCount((p as unknown as Record<string, unknown>).comments_count),
+  }))
 
   // Check likes and saves for current user
   const postIds = posts.map((p) => p.id)
@@ -132,7 +145,12 @@ export async function getExplorePosts(
     .range(from, to)
 
   if (error) throw error
-  return data as unknown as PostWithDetails[]
+  const rawPosts = data as unknown as PostWithDetails[]
+  return rawPosts.map((p) => ({
+    ...p,
+    likes_count: extractCount((p as unknown as Record<string, unknown>).likes_count),
+    comments_count: extractCount((p as unknown as Record<string, unknown>).comments_count),
+  }))
 }
 
 export async function getUserPosts(
@@ -154,7 +172,12 @@ export async function getUserPosts(
 
   if (error) throw error
 
-  const posts = data as unknown as PostWithDetails[]
+  const rawPosts = data as unknown as PostWithDetails[]
+  const posts = rawPosts.map((p) => ({
+    ...p,
+    likes_count: extractCount((p as unknown as Record<string, unknown>).likes_count),
+    comments_count: extractCount((p as unknown as Record<string, unknown>).comments_count),
+  }))
 
   if (currentUserId) {
     const postIds = posts.map((p) => p.id)

@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { supabase } from '@/services/supabase/client'
 import { subscribeToIncomingCalls } from '@/services/supabase/calls'
 import { useAuthStore } from '@/features/auth/stores/auth.store'
 import { useCallStore } from '../stores/call.store'
@@ -18,7 +19,7 @@ export function useIncomingCalls() {
     })
 
     return () => {
-      subscription.unsubscribe()
+      supabase.removeChannel(subscription)
     }
   }, [user, callStatus, setIncomingCall])
 }

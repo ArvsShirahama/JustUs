@@ -167,7 +167,7 @@ create table if not exists public.saved_posts (
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, username, display_name, avatar_url)
+  insert into public.profiles (id, username, display_name)
   values (
     new.id,
     coalesce(new.raw_user_meta_data ->> 'username', 'user_' || substr(new.id::text, 1, 8)),
@@ -191,11 +191,13 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger if not exists profiles_updated_at
+drop trigger if exists profiles_updated_at on public.profiles;
+create trigger profiles_updated_at
   before update on public.profiles
   for each row execute function public.update_updated_at();
 
-create trigger if not exists posts_updated_at
+drop trigger if exists posts_updated_at on public.posts;
+create trigger posts_updated_at
   before update on public.posts
   for each row execute function public.update_updated_at();
 

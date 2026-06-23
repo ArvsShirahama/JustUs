@@ -41,7 +41,13 @@ export async function searchPosts(query: string): Promise<SearchPostResult[]> {
     .limit(20)
 
   if (error) throw error
-  return data as unknown as SearchPostResult[]
+  const rawPosts = data as unknown as SearchPostResult[]
+  return rawPosts.map((p) => ({
+    ...p,
+    likes_count: Array.isArray((p as unknown as Record<string, unknown>).likes_count)
+      ? (((p as unknown as Record<string, unknown>).likes_count as { count: number }[])[0]?.count ?? 0)
+      : ((p as unknown as Record<string, unknown>).likes_count as number),
+  }))
 }
 
 export async function searchHashtags(

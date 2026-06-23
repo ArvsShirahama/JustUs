@@ -16,14 +16,6 @@ export async function signup(input: SignupInput): Promise<AuthUser> {
   if (error) throw error
   if (!data.user) throw new Error('Signup failed')
 
-  const { error: profileError } = await supabase.from('profiles').insert({
-    id: data.user.id,
-    username: input.username,
-    display_name: input.displayName,
-  })
-
-  if (profileError) throw profileError
-
   return mapUser(data.user)
 }
 

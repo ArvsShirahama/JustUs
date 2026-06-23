@@ -9,6 +9,14 @@ export type ProfileWithCounts = Profile & {
   is_follower?: boolean
 }
 
+function extractCount(val: unknown): number {
+  if (Array.isArray(val) && val.length > 0) {
+    const first = val[0] as Record<string, unknown>
+    return typeof first.count === 'number' ? first.count : 0
+  }
+  return 0
+}
+
 export async function getProfile(
   username: string
 ): Promise<ProfileWithCounts | null> {
@@ -18,8 +26,8 @@ export async function getProfile(
       `
       *,
       posts_count: posts(count),
-      followers_count: followers!following_id(count),
-      following_count: followers!follower_id(count)
+      followers_count: follows!following_id(count),
+      following_count: follows!follower_id(count)
     `
     )
     .eq('username', username)
@@ -28,7 +36,12 @@ export async function getProfile(
   if (error) return null
   if (!profile) return null
 
-  return profile as unknown as ProfileWithCounts
+  return {
+    ...profile,
+    posts_count: extractCount((profile as Record<string, unknown>).posts_count),
+    followers_count: extractCount((profile as Record<string, unknown>).followers_count),
+    following_count: extractCount((profile as Record<string, unknown>).following_count),
+  } as ProfileWithCounts
 }
 
 export async function getProfileById(
@@ -40,15 +53,20 @@ export async function getProfileById(
       `
       *,
       posts_count: posts(count),
-      followers_count: followers!following_id(count),
-      following_count: followers!follower_id(count)
+      followers_count: follows!following_id(count),
+      following_count: follows!follower_id(count)
     `
     )
     .eq('id', userId)
     .single()
 
   if (error) return null
-  return profile as unknown as ProfileWithCounts
+  return {
+    ...profile,
+    posts_count: extractCount((profile as Record<string, unknown>).posts_count),
+    followers_count: extractCount((profile as Record<string, unknown>).followers_count),
+    following_count: extractCount((profile as Record<string, unknown>).following_count),
+  } as ProfileWithCounts
 }
 
 export async function updateProfile(

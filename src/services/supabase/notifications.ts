@@ -62,7 +62,7 @@ export function subscribeToNotifications(
   callback: (notification: NotificationWithActor) => void
 ) {
   return supabase
-    .channel(`notifications:${userId}`)
+    .channel(`notifications:${userId}:${crypto.randomUUID()}`)
     .on(
       'postgres_changes',
       {

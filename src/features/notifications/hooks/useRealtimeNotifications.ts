@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { supabase } from '@/services/supabase/client'
 import { subscribeToNotifications } from '@/services/supabase/notifications'
 import { useAuthStore } from '@/features/auth/stores/auth.store'
 import { useNotificationsStore } from '../stores/notifications.store'
@@ -19,7 +20,7 @@ export function useRealtimeNotifications() {
     })
 
     return () => {
-      subscription.unsubscribe()
+      supabase.removeChannel(subscription)
     }
   }, [user, queryClient, incrementUnread, unreadCount])
 }

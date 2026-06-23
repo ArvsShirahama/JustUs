@@ -52,7 +52,7 @@ export async function getConversations(
     `
     )
     .eq('user_id', userId)
-    .order('last_read_at', { ascending: false, referencedTable: 'conversations' })
+    .order('last_read_at', { ascending: false })
 
   if (error) throw error
 
@@ -90,12 +90,16 @@ export async function getOrCreateConversation(
 
   const { error: insertError } = await supabase
     .from('conversation_participants')
-    .insert([
-      { conversation_id: conv.id, user_id: userId },
-      { conversation_id: conv.id, user_id: otherUserId },
-    ])
+    .insert({ conversation_id: conv.id, user_id: userId })
 
   if (insertError) throw insertError
+
+  const { error: rpcError } = await supabase.rpc(
+    'add_conversation_participant',
+    { conv_id: conv.id, participant_id: otherUserId }
+  )
+
+  if (rpcError) throw rpcError
   return conv.id
 }
 
@@ -206,7 +210,7 @@ export function subscribeToConversation(
   callback: (message: MessageWithSender) => void
 ) {
   return supabase
-    .channel(`messages:${conversationId}`)
+    .channel(`messages:${conversationId}:${crypto.randomUUID()}`)
     .on(
       'postgres_changes',
       {

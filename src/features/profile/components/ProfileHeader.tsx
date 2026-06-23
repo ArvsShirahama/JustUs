@@ -1,19 +1,40 @@
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { LogOut } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import type { ProfileWithCounts } from '@/services/supabase/profiles'
+import { getFollowers, getFollowing } from '@/services/supabase/profiles'
 import { FollowButton } from './FollowButton'
+import { FollowList } from './FollowList'
 import { useAuthStore } from '@/features/auth/stores/auth.store'
 import { useLogout } from '@/features/auth/hooks/useLogout'
+import { ROUTES } from '@/lib/constants'
 
 interface ProfileHeaderProps {
   profile: ProfileWithCounts
 }
 
+type FollowListType = 'followers' | 'following'
+
 export function ProfileHeader({ profile }: ProfileHeaderProps) {
   const { t } = useTranslation()
   const currentUser = useAuthStore((s) => s.user)
   const { mutate: doLogout } = useLogout()
+  const [followListType, setFollowListType] = useState<FollowListType | null>(null)
   const isOwn = currentUser?.id === profile.id
+
+  const { data: followers, isLoading: followersLoading } = useQuery({
+    queryKey: ['followers', profile.id],
+    queryFn: () => getFollowers(profile.id),
+    enabled: followListType === 'followers',
+  })
+
+  const { data: following, isLoading: followingLoading } = useQuery({
+    queryKey: ['following', profile.id],
+    queryFn: () => getFollowing(profile.id),
+    enabled: followListType === 'following',
+  })
 
   return (
     <div className="px-4 pt-4 pb-2">
@@ -86,7 +107,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
             {t('profile.posts')}
           </span>
         </div>
-        <button className="text-center hover:opacity-80">
+        <button className="text-center hover:opacity-80" onClick={() => setFollowListType('followers')}>
           <span className="block font-bold text-[hsl(var(--foreground))]">
             {profile.followers_count ?? 0}
           </span>
@@ -94,7 +115,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
             {t('profile.followers')}
           </span>
         </button>
-        <button className="text-center hover:opacity-80">
+        <button className="text-center hover:opacity-80" onClick={() => setFollowListType('following')}>
           <span className="block font-bold text-[hsl(var(--foreground))]">
             {profile.following_count ?? 0}
           </span>
@@ -105,9 +126,12 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
       </div>
 
       {isOwn ? (
-        <button className="mt-4 w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] py-1.5 text-sm font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))] transition-colors">
+        <Link
+          to={ROUTES.editProfile}
+          className="mt-4 block w-full rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--background))] py-1.5 text-sm font-medium text-[hsl(var(--foreground))] text-center hover:bg-[hsl(var(--muted))] transition-colors"
+        >
           {t('profile.editProfile')}
-        </button>
+        </Link>
       ) : (
         <div className="mt-4">
           <FollowButton
@@ -116,6 +140,23 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
             isFollowing={profile.is_following ?? false}
           />
         </div>
+      )}
+
+      {followListType === 'followers' && (
+        <FollowList
+          users={followers ?? []}
+          title={t('profile.followers')}
+          isLoading={followersLoading}
+          onClose={() => setFollowListType(null)}
+        />
+      )}
+      {followListType === 'following' && (
+        <FollowList
+          users={following ?? []}
+          title={t('profile.following')}
+          isLoading={followingLoading}
+          onClose={() => setFollowListType(null)}
+        />
       )}
     </div>
   )

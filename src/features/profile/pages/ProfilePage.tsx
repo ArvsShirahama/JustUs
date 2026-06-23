@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Settings } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { useProfile } from '../hooks/useProfile'
 import { ProfileHeader } from '../components/ProfileHeader'
 import { ProfileTabs } from '../components/ProfileTabs'
 import { ProfileGrid } from '../components/ProfileGrid'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
 import { useAuthStore } from '@/features/auth/stores/auth.store'
+import { getUserPosts } from '@/services/supabase/posts'
 import { ROUTES } from '@/lib/constants'
 
 export default function ProfilePage() {
@@ -16,6 +18,12 @@ export default function ProfilePage() {
   const currentUser = useAuthStore((s) => s.user)
   const { data: profile, isLoading, error } = useProfile(username ?? '')
   const [tab, setTab] = useState<'posts' | 'saved'>('posts')
+
+  const { data: posts, isLoading: postsLoading } = useQuery({
+    queryKey: ['profile-posts', profile?.id],
+    queryFn: () => getUserPosts(profile!.id, currentUser?.id),
+    enabled: !!profile,
+  })
 
   const isOwn = currentUser?.username === username
 
@@ -73,8 +81,8 @@ export default function ProfilePage() {
         isOwn={isOwn}
       />
       <ProfileGrid
-        posts={[]}
-        isLoading={false}
+        posts={posts}
+        isLoading={postsLoading}
       />
     </div>
   )

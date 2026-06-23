@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
+import { supabase } from '@/services/supabase/client'
 import {
   getMessages,
   markAsSeen,
@@ -35,7 +36,7 @@ export function useMessages(conversationId: string) {
     })
 
     return () => {
-      subscription.unsubscribe()
+      supabase.removeChannel(subscription)
     }
   }, [conversationId, user, queryClient])
 

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react'
+import { supabase } from '@/services/supabase/client'
 import {
   subscribeToTyping,
   emitTyping,
@@ -29,7 +30,7 @@ export function useTypingIndicator(conversationId: string) {
     )
 
     return () => {
-      subscription.unsubscribe()
+      supabase.removeChannel(subscription)
     }
   }, [conversationId, user, addTypingUser, removeTypingUser])
 

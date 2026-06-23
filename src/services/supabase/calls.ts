@@ -83,7 +83,7 @@ export function subscribeToIncomingCalls(
   callback: (call: CallWithUsers) => void
 ) {
   return supabase
-    .channel(`calls:${userId}`)
+    .channel(`calls:${userId}:${crypto.randomUUID()}`)
     .on(
       'postgres_changes',
       {
