@@ -4,6 +4,7 @@ import { useAuthStore } from '@/features/auth/stores/auth.store'
 import { getCurrentUser } from '@/services/supabase/auth'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
 import { AppShell } from '@/components/layout/AppShell'
+import { useRealtimeNotifications } from '@/features/notifications/hooks/useRealtimeNotifications'
 
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'))
 const SignupPage = lazy(() => import('@/features/auth/pages/SignupPage'))
@@ -21,6 +22,14 @@ const FeedPage = lazy(() => import('@/features/feed/pages/FeedPage'))
 const ExplorePage = lazy(
   () => import('@/features/feed/pages/ExplorePage')
 )
+const NotificationsPage = lazy(
+  () => import('@/features/notifications/pages/NotificationsPage')
+)
+
+function AuthenticatedApp({ children }: { children: React.ReactNode }) {
+  useRealtimeNotifications()
+  return <AppShell>{children}</AppShell>
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
@@ -38,7 +47,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />
   }
 
-  return <AppShell>{children}</AppShell>
+  return <AuthenticatedApp>{children}</AuthenticatedApp>
 }
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
@@ -132,6 +141,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <ExplorePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <NotificationsPage />
             </ProtectedRoute>
           }
         />
