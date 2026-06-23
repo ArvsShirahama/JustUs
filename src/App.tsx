@@ -8,6 +8,7 @@ import { useRealtimeNotifications } from '@/features/notifications/hooks/useReal
 import { useIncomingCalls } from '@/features/calls/hooks/useIncomingCalls'
 import { IncomingCallDialog } from '@/features/calls/components/IncomingCallDialog'
 import { useCallStore } from '@/features/calls/stores/call.store'
+import { OfflineBanner } from '@/components/common/OfflineBanner'
 
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'))
 const SignupPage = lazy(() => import('@/features/auth/pages/SignupPage'))
@@ -37,6 +38,10 @@ const ConversationPage = lazy(
 const CallHistoryPage = lazy(
   () => import('@/features/calls/pages/CallHistoryPage')
 )
+const SearchPage = lazy(() => import('@/features/search/pages/SearchPage'))
+const SettingsPage = lazy(
+  () => import('@/features/settings/pages/SettingsPage')
+)
 
 function AuthenticatedApp({ children }: { children: React.ReactNode }) {
   useRealtimeNotifications()
@@ -62,6 +67,7 @@ function AuthenticatedApp({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <OfflineBanner />
       <AppShell>{children}</AppShell>
       {incomingCall && (
         <IncomingCallDialog
@@ -211,6 +217,14 @@ export default function App() {
           }
         />
         <Route
+          path="/search"
+          element={
+            <ProtectedRoute>
+              <SearchPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/calls"
           element={
             <ProtectedRoute>
@@ -231,6 +245,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <EditProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingsPage />
             </ProtectedRoute>
           }
         />
