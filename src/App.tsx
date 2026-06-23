@@ -13,6 +13,10 @@ const ForgotPasswordPage = lazy(
 const VerifyEmailPage = lazy(
   () => import('@/features/auth/pages/VerifyEmailPage')
 )
+const ProfilePage = lazy(() => import('@/features/profile/pages/ProfilePage'))
+const EditProfilePage = lazy(
+  () => import('@/features/profile/pages/EditProfilePage')
+)
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
@@ -137,6 +141,24 @@ export default function App() {
           element={
             <ProtectedRoute>
               <FeedPlaceholder />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/edit-profile"
+          element={
+            <ProtectedRoute>
+              <EditProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Profile route — wildcard, keep after specific routes */}
+        <Route
+          path="/:username"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
             </ProtectedRoute>
           }
         />
