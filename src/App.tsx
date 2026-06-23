@@ -17,6 +17,10 @@ const ProfilePage = lazy(() => import('@/features/profile/pages/ProfilePage'))
 const EditProfilePage = lazy(
   () => import('@/features/profile/pages/EditProfilePage')
 )
+const FeedPage = lazy(() => import('@/features/feed/pages/FeedPage'))
+const ExplorePage = lazy(
+  () => import('@/features/feed/pages/ExplorePage')
+)
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
@@ -54,19 +58,6 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   }
 
   return <>{children}</>
-}
-
-function FeedPlaceholder() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
-      <h1 className="text-2xl font-bold text-[hsl(var(--foreground))]">
-        Welcome to JustUs
-      </h1>
-      <p className="mt-2 text-[hsl(var(--muted-foreground))]">
-        Your feed will appear here. Start following people to see their posts.
-      </p>
-    </div>
-  )
 }
 
 function AuthCallback() {
@@ -132,7 +123,15 @@ export default function App() {
           path="/feed"
           element={
             <ProtectedRoute>
-              <FeedPlaceholder />
+              <FeedPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/explore"
+          element={
+            <ProtectedRoute>
+              <ExplorePage />
             </ProtectedRoute>
           }
         />
@@ -140,7 +139,7 @@ export default function App() {
           path="/"
           element={
             <ProtectedRoute>
-              <FeedPlaceholder />
+              <FeedPage />
             </ProtectedRoute>
           }
         />
