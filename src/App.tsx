@@ -25,6 +25,12 @@ const ExplorePage = lazy(
 const NotificationsPage = lazy(
   () => import('@/features/notifications/pages/NotificationsPage')
 )
+const MessagesPage = lazy(
+  () => import('@/features/messages/pages/MessagesPage')
+)
+const ConversationPage = lazy(
+  () => import('@/features/messages/pages/ConversationPage')
+)
 
 function AuthenticatedApp({ children }: { children: React.ReactNode }) {
   useRealtimeNotifications()
@@ -149,6 +155,22 @@ export default function App() {
           element={
             <ProtectedRoute>
               <NotificationsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/messages"
+          element={
+            <ProtectedRoute>
+              <MessagesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/messages/:id"
+          element={
+            <ProtectedRoute>
+              <ConversationPage />
             </ProtectedRoute>
           }
         />
